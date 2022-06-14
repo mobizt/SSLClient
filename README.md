@@ -1,3 +1,38 @@
+# The Forked version of SSLClient to support connection upgrade
+
+This modification based on SSLClient v1.6.11.
+
+This forked version enhanced the SSLClient library to work with Email protocols e.g. SMTP and IMAP.
+
+### For Email applications.
+
+```cpp
+BaseClientType baseClientInstance;
+SSLClient client(baseClientInstance, TAs, (size_t)TAs_NUM, AnalogPin);
+
+// Begin the SMTP server connection with ns_connect function
+client.ns_connect("gmail.com" /* host */, 587 /* port */);
+```
+
+And to upgrade the connection when TLS is required.
+
+When the base client is already connected, calling `client.connect` will keep the current TCP connection opened and setting up the SSL and do SSL hanshake.
+
+```cpp
+// Upgrade the connection when client is already connected
+client.connect("gmail.com" /* host */, 587 /* port */);
+```
+
+
+### For general applications.
+
+```cpp
+BaseClientType baseClientInstance;
+SSLClient client(baseClientInstance, TAs, (size_t)TAs_NUM, AnalogPin);
+
+client.connect("google.com" /* host */, 443 /* port */);
+```
+
 # SSLClient
 
 ![CI](https://github.com/OPEnSLab-OSU/SSLClient/workflows/CI/badge.svg)
