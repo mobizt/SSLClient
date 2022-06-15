@@ -70,8 +70,11 @@ SSLClient::SSLClient(Client &client,
 }
 
 /* see SSLClient.h*/
-int SSLClient::connect(IPAddress ip, uint16_t port)
+int SSLClient::connectSSL(IPAddress ip, uint16_t port)
 {
+    if (!isSecurePort(port))
+        return connect(ip, port);
+
     const char *func_name = __func__;
     // connection check
     if (!get_arduino_client().connected())
@@ -95,10 +98,10 @@ int SSLClient::connect(IPAddress ip, uint16_t port)
     return m_start_ssl(nullptr);
 }
 
-int SSLClient::ns_connect(IPAddress ip, uint16_t port)
+int SSLClient::connect(IPAddress ip, uint16_t port)
 {
-    if (port == 465 || port == 993) // SSL connect
-        return connect(ip, port);
+    if (isSecurePort(port)) // SSL connect
+        return connectSSL(ip, port);
 
     m_secure = false;
 
@@ -116,8 +119,11 @@ int SSLClient::ns_connect(IPAddress ip, uint16_t port)
 }
 
 /* see SSLClient.h*/
-int SSLClient::connect(const char *host, uint16_t port)
+int SSLClient::connectSSL(const char *host, uint16_t port)
 {
+    if (!isSecurePort(port))
+        return connect(host, port);
+
     const char *func_name = __func__;
     // connection check
     if (!get_arduino_client().connected())
@@ -139,11 +145,11 @@ int SSLClient::connect(const char *host, uint16_t port)
     return m_start_ssl(host, getSession(host));
 }
 
-int SSLClient::ns_connect(const char *host, uint16_t port)
+int SSLClient::connect(const char *host, uint16_t port)
 {
 
-    if (port == 465 || port == 993) // SSL connect
-        return connect(host, port);
+    if (isSecurePort(port)) // SSL connect
+        return connectSSL(host, port);
 
     m_secure = false;
 
@@ -158,6 +164,19 @@ int SSLClient::ns_connect(const char *host, uint16_t port)
     m_info("Base client connected!", func_name);
 
     return 1;
+}
+bool SSLClient::isSecurePort(uint16_t port)
+{
+    int size = *(&m_secure_ports + 1) - m_secure_ports;
+    for (int i = 0; i < size; i++)
+    {
+        if (port == m_secure_ports[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /* see SSLClient.h*/

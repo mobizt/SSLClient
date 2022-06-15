@@ -10,17 +10,17 @@ This forked version enhanced the SSLClient library to work with Email protocols 
 BaseClientType baseClientInstance;
 SSLClient client(baseClientInstance, TAs, (size_t)TAs_NUM, AnalogPin);
 
-// Begin the SMTP server connection with ns_connect function
-client.ns_connect("gmail.com" /* host */, 587 /* port */);
+// Begin the SMTP server connection
+client.connect("gmail.com" /* host */, 587 /* port */);
 ```
 
 And to upgrade the connection when TLS is required.
 
-When the base client is already connected, calling `client.connect` will keep the current TCP connection opened and setting up the SSL and do SSL hanshake.
+When the base client is already connected, calling `client.connectSSL` will keep the current TCP connection opened and setting up the SSL and do SSL hanshake.
 
 ```cpp
 // Upgrade the connection when client is already connected
-client.connect("gmail.com" /* host */, 587 /* port */);
+client.connectSSL("gmail.com" /* host */, 587 /* port */);
 ```
 
 
@@ -31,6 +31,10 @@ BaseClientType baseClientInstance;
 SSLClient client(baseClientInstance, TAs, (size_t)TAs_NUM, AnalogPin);
 
 client.connect("google.com" /* host */, 443 /* port */);
+
+// or
+
+client.connectSSL("google.com" /* host */, 443 /* port */);
 ```
 
 # SSLClient

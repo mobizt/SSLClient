@@ -175,11 +175,11 @@ public:
      */
     int connect(IPAddress ip, uint16_t port) override;
 
-    /** Non-secure connection
+    /** Secure or upgrade connection
      * @param ip The IP address to connect to
      * @param port the port to connect to
      */
-    int ns_connect(IPAddress ip, uint16_t port);
+    int connectSSL(IPAddress ip, uint16_t port);
 
     /**
      * @brief Connect over SSL to a host specified by a hostname.
@@ -219,11 +219,11 @@ public:
      */
     int connect(const char *host, uint16_t port) override;
 
-    /** Non-secure connection
+    /** Secure or upgrade connection
      * @param host The hostname as a null-terminated c-string ("www.google.com")
      * @param port The port to connect to on the host
      */
-    int ns_connect(const char *host, uint16_t port);
+    int connectSSL(const char *host, uint16_t port);
 
     /**
      * @brief Write some bytes to the SSL connection
@@ -481,6 +481,8 @@ private:
     template <typename T>
     void m_error(const T str, const char *func_name) const { m_print(str, func_name, SSL_ERROR); }
 
+    bool isSecurePort(uint16_t port);
+
     //============================================
     //= Data Members
     //============================================
@@ -523,6 +525,8 @@ private:
     unsigned m_br_last_state;
     // store secure connection mode
     bool m_secure = false;
+
+    uint16_t m_secure_ports[26] = {443 /* HTTPS */, 465 /* SMTP */, 563 /* NNTP */, 636 /* LDAPS */, 695 /* IEEE-MMS-SSL */, 832 /* NETCONF */, 853 /* DNS */, 989 /* FTPS */, 990 /* FTPS */, 992 /* Telnet */, 993 /* IMAP */, 995 /* POP3 */, 4116 /* Smartcard */, 4843 /* OPC */, 5061 /* SIP */, 5085 /* LLIP */, 5349 /* NAT */, 5671 /* AMQP */, 5986 /* WinRM-HTTPS */, 6513 /* NETCONF */, 6514 /* Syslog */, 6515 /* Elipse RPC */, 6619 /* OFTP */, 8243 /* Apache Synapse */, 8403 /* GxFWD */, 8883 /* MQTT */};
 };
 
 #endif /** SSLClient_H_ */
