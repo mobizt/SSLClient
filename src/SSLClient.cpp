@@ -72,8 +72,6 @@ SSLClient::SSLClient(Client &client,
 /* see SSLClient.h*/
 int SSLClient::connectSSL(IPAddress ip, uint16_t port)
 {
-    if (!isSecurePort(port))
-        return connect(ip, port);
 
     const char *func_name = __func__;
     // connection check
@@ -121,8 +119,6 @@ int SSLClient::connect(IPAddress ip, uint16_t port)
 /* see SSLClient.h*/
 int SSLClient::connectSSL(const char *host, uint16_t port)
 {
-    if (!isSecurePort(port))
-        return connect(host, port);
 
     const char *func_name = __func__;
     // connection check
