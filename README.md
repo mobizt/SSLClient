@@ -1,6 +1,6 @@
-# The forked version of SSLClient to support connection upgrade
+# The connection upgradable SSLClient
 
-This modification based on SSLClient v1.6.11.
+This fork based on SSLClient v1.6.11.
 
 This forked version enhanced the SSLClient library to work with Email protocols e.g. SMTP and IMAP.
 
