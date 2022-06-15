@@ -53,6 +53,10 @@
 #ifndef SSLClient_H_
 #define SSLClient_H_
 
+#ifndef SSLCLIENT_CONNECTION_UPGRADABLE
+#define SSLCLIENT_CONNECTION_UPGRADABLE
+#endif
+
 /**
  * @brief The main SSLClient class.
  * Check out README.md for more info.

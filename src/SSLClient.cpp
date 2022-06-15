@@ -78,7 +78,6 @@ int SSLClient::connectSSL(IPAddress ip, uint16_t port)
     if (!get_arduino_client().connected())
     {
         m_secure = true;
-
         // reset indexs for saftey
         m_write_idx = 0;
         // Warning for security
@@ -331,33 +330,32 @@ void SSLClient::flush()
 /* see SSLClient.h */
 void SSLClient::stop()
 {
-    if (!m_secure)
+    if (m_secure)
     {
-        get_arduino_client().stop();
-        return;
-    }
-    // tell the SSL connection to gracefully close
-    // Disabled to prevent close_notify from hanging SSLClient
-    // br_ssl_engine_close(&m_sslctx.eng);
-    // if the engine isn't closed, and the socket is still open
-    auto state = br_ssl_engine_current_state(&m_sslctx.eng);
-    if (state != BR_SSL_CLOSED && state != 0 && connected())
-    {
-        /*
-         * Discard any incoming application data.
-         */
-        size_t len;
-        if (br_ssl_engine_recvapp_buf(&m_sslctx.eng, &len) != nullptr)
+        // tell the SSL connection to gracefully close
+        // Disabled to prevent close_notify from hanging SSLClient
+        // br_ssl_engine_close(&m_sslctx.eng);
+        // if the engine isn't closed, and the socket is still open
+        auto state = br_ssl_engine_current_state(&m_sslctx.eng);
+        if (state != BR_SSL_CLOSED && state != 0 && connected())
         {
-            br_ssl_engine_recvapp_ack(&m_sslctx.eng, len);
+            /*
+             * Discard any incoming application data.
+             */
+            size_t len;
+            if (br_ssl_engine_recvapp_buf(&m_sslctx.eng, &len) != nullptr)
+            {
+                br_ssl_engine_recvapp_ack(&m_sslctx.eng, len);
+            }
+            // run SSL to finish any existing transactions
+            flush();
         }
-        // run SSL to finish any existing transactions
-        flush();
     }
     // close the ethernet socket
     get_arduino_client().flush();
     get_arduino_client().stop();
     // we are no longer connected
+    m_secure = false;
     m_is_connected = false;
 }
 
@@ -365,7 +363,9 @@ void SSLClient::stop()
 uint8_t SSLClient::connected()
 {
     if (!m_secure)
+    {
         return get_arduino_client().connected();
+    }
 
     const char *func_name = __func__;
     // check all of the error cases
@@ -389,6 +389,7 @@ uint8_t SSLClient::connected()
         }
         // we are not connected
         m_is_connected = false;
+        m_secure = false;
         // set the write error so the engine doesn't try to close the connection
         stop();
     }
@@ -397,6 +398,7 @@ uint8_t SSLClient::connected()
         m_error("Not connected because write error is set", func_name);
         m_print_ssl_error(getWriteError(), SSL_ERROR);
     }
+
     return c_con && br_con;
 }
 
@@ -521,6 +523,7 @@ int SSLClient::m_start_ssl(const char *host, SSLSession *ssl_ses)
     }
     m_info("Connection successful!", func_name);
     m_is_connected = true;
+    m_secure = true;
     // all good to go! the SSL socket should be up and running
     // overwrite the session we got with new parameters
     if (ssl_ses != nullptr)
@@ -534,7 +537,6 @@ int SSLClient::m_start_ssl(const char *host, SSLSession *ssl_ses)
         m_sessions.push_back(session);
     }
 
-    m_secure = true;
     return 1;
 }
 
