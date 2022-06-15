@@ -1,4 +1,4 @@
-# The Forked version of SSLClient to support connection upgrade
+# The forked version of SSLClient to support connection upgrade
 
 This modification based on SSLClient v1.6.11.
 
