@@ -4,7 +4,7 @@
  * The original version was developed by Noah Koontz and OSU OPEnS Lab
  *
  * The MIT License (MIT)
- * Copyright (c) 2022 K. Suwatchai (Mobizt)
+ * Copyright (c) 2023 K. Suwatchai (Mobizt)
  *
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -385,7 +385,7 @@ uint8_t SSLClient::connected()
         // Else tell the user the endpoint closed the socket on us (ouch)
         else
         {
-            m_warn("Socket was dropped unexpectedly (this can be an alternative to closing the connection)", func_name);
+            // m_warn("Socket was dropped unexpectedly (this can be an alternative to closing the connection)", func_name);
         }
         // we are not connected
         m_is_connected = false;
@@ -605,15 +605,18 @@ int SSLClient::m_run_until(const unsigned target)
          * to remedy the problem by telling the engine to discard
          * the data.
          */
-        if (state & BR_SSL_RECVAPP && target & BR_SSL_SENDAPP)
+        if (state & BR_SSL_RECVAPP)
         {
             size_t len;
             if (br_ssl_engine_recvapp_buf(&m_sslctx.eng, &len) != nullptr)
             {
-                m_write_idx = 0;
-                m_warn("Discarded unread data to favor a write operation", func_name);
-                br_ssl_engine_recvapp_ack(&m_sslctx.eng, len);
-                continue;
+                // if application data is ready in buffer, don't ignore, just return.
+
+                // m_write_idx = 0;
+                // m_warn("Discarded unread data to favor a write operation", func_name);
+                // br_ssl_engine_recvapp_ack(&m_sslctx.eng, len);
+                // continue;
+                return 0;
             }
             else
             {
@@ -622,6 +625,13 @@ int SSLClient::m_run_until(const unsigned target)
                 stop();
                 return -1;
             }
+        }
+
+        if (target & BR_SSL_SENDAPP)
+        {
+            // reset the write index
+            m_write_idx = 0;
+            continue;
         }
 
         /*
